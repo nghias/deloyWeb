@@ -1,0 +1,29 @@
+name: Deploy Static Site
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # BỎ QUA BƯỚC SETUP NODE & BUILD
+
+    - name: Upload to Somee via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./             # Upload toàn bộ thư mục gốc lên
+        server-dir: /www.dh52201267oss.somee.com/
+        exclude: |                # Loại bỏ mấy file rác không cần thiết
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
