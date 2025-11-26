@@ -36,7 +36,9 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
+          server: ${{secrets/FTP_SERVER}}
+          username: ${{secrets/FTP_USENAME}}
+          password: ${{secrets/FTP_PASSWORD}}
           path: '.'
       - name: Deploy to GitHub Pages
         id: deployment
