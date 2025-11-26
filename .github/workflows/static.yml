@@ -1,48 +1,38 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: Deploy to Somee.com via FTP
 
 on:
-  # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
+    branches:
+      - main  # Chạy workflow khi có đẩy mã lên nhánh main
+  workflow_dispatch:  # Cho phép chạy thủ công từ tab Actions
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  contents: read  # Quyền đọc nội dung trong repo
+  pages: write  # Quyền ghi lên GitHub Pages (nếu có cần dùng)
+  id-token: write  # Quyền sử dụng token
 
 jobs:
-  # Single deploy job since we're just deploying
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Chạy trên môi trường Ubuntu
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          name: my-static-site
-          path: ./_site 
-          server: ${{secrets.FTP_SERVER}}
-          username: ${{secrets.FTP_USENAME}}
-          password: ${{secrets.FTP_PASSWORD}}
-          local-dir: ./
-          server-dir: /wwwroot/
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      # Bước 1: Checkout mã nguồn
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Bước 2: Cài đặt lệnh FTP (sử dụng lftp hoặc curl)
+      - name: Install lftp
+        run: sudo apt-get install -y lftp
+
+      # Bước 3: Upload các tệp lên Somee.com qua FTP
+      - name: Deploy to Somee.com via FTP
+        run: |
+          lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }} <<EOF
+          mirror -R ./_site /wwwroot/  # Thay đổi đường dẫn nếu cần
+          quit
+          EOF
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+
