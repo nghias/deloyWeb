@@ -36,6 +36,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
+          name: my-static-site
+          path: ./_site 
           server: ${{secrets.FTP_SERVER}}
           username: ${{secrets.FTP_USENAME}}
           password: ${{secrets.FTP_PASSWORD}}
