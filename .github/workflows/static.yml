@@ -39,7 +39,8 @@ jobs:
           server: ${{secrets/FTP_SERVER}}
           username: ${{secrets/FTP_USENAME}}
           password: ${{secrets/FTP_PASSWORD}}
-          path: '.'
+          local-dir: ./
+          server-dir: /wwwroot/
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
