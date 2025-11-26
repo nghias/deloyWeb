@@ -1,37 +1,29 @@
-name: Deploy Frontend to Somee.com via FTP
+name: Deploy Static Site
 
 on:
   push:
     branches:
-      - main  # Workflow sẽ chạy khi bạn đẩy mã lên nhánh 'main'
-  workflow_dispatch:  # Cho phép bạn chạy thủ công từ tab Actions
-
-permissions:
-  contents: read  # Quyền đọc mã nguồn trong repo
-  pages: write  # Quyền ghi lên GitHub Pages (nếu có cần dùng)
-  id-token: write  # Quyền sử dụng token
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # Sử dụng môi trường Ubuntu
+    runs-on: ubuntu-latest
 
     steps:
-      # Bước 1: Checkout mã nguồn từ GitHub
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      # Bước 2: Cài đặt lftp (FTP client)
-      - name: Install lftp
-        run: sudo apt-get install -y lftp
+    # BỎ QUA BƯỚC SETUP NODE & BUILD
 
-      # Bước 3: Upload các tệp từ thư mục hiện tại lên FTP của Somee.com
-      - name: Deploy to Somee.com via FTP
-        run: |
-          lftp -u ${{ secrets.FTP_USERNAME }},${{ secrets.FTP_PASSWORD }} ${{ secrets.FTP_SERVER }} <<EOF
-          mirror -R ./ /wwwroot/  # Upload tất cả tệp từ thư mục hiện tại lên thư mục /wwwroot/ trên Somee.com
-          quit
-          EOF
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}  # Địa chỉ FTP của bạn
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}  # Tên người dùng FTP
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}  # Mật khẩu FTP
+    - name: Upload to Somee via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./             # Upload toàn bộ thư mục gốc lên
+        server-dir: /www.dh52201267oss.somee.com/
+        exclude: |                # Loại bỏ mấy file rác không cần thiết
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
